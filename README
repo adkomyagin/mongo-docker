@@ -1,0 +1,65 @@
+Docker setup
+
+Some random stuff
+docker run --dns "192.168.0.1" -h "mongo1.test" -i -t alex/mongo1 /bin/bash
+
+docker run --dns "192.168.0.1" -h "mongo1.test" -rm -i -t alex/mongo1 /bin/bash
+
+disable apparmor
+
+sudo invoke-rc.d apparmor kill
+sudo update-rc.d -f apparmor remove
+
+docker run --dns "192.168.0.1" -h "mongo1." -rm --privileged -i -t alex/mongo1 /bin/bash
+
+
+root@ip-10-45-3-116:/home/ubuntu# cat /etc/network/interfaces.d/br0.cfg
+auto br0
+iface br0 inet static
+address 192.168.0.1
+netmask 255.255.0.0
+
+brctl addbr br0
+
+docker run --dns "192.168.0.1" -h "mongo6.test" --privileged -d alex/mongo6 '--replSet xxx'
+
+root@ip-10-45-3-116:/data/mongo-docker# cat starter.sh
+#!/bin/bash
+set -e
+
+dhclient
+sleep 1
+exec mongod --smallfiles --logpath /data/mongod.log $@
+#echo mongod --smallfiles --logpath /data/mongod.log $@
+
+root@ip-10-45-3-116:/data/mongo-docker# cat Dockerfile
+FROM       ubuntu:latest
+MAINTAINER Alex Komyagin <alex@mongodb.com>
+
+ENV mongo_version 2.6.4
+
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+RUN echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | tee /etc/apt/sources.list.d/10gen.list
+RUN apt-get update && apt-get install -y mongodb-org=${mongo_version} mongodb-org-server=${mongo_version} mongodb-org-shell=${mongo_version} mongodb-org-mongos=${mongo_version} mongodb-org-tools=${mongo_version}
+
+RUN mkdir -p /data/db
+EXPOSE 27017
+COPY starter.sh /opt/starter.sh
+
+ENTRYPOINT ["/opt/starter.sh"]
+
+----------------
+
+docker run --dns "192.168.0.1" -h "mongo7" --name mongod_XXX_2 --privileged -d alex/mongo6 '--replSet xxx'
+
+docker run --dns "192.168.0.1" -h "mongotest" --name mongo --privileged --rm --entrypoint /bin/bash -it alex/mongo6 -c /bin/bash
+
+sudo docker exec -i -t 665b4a1e17b6 bash
+
+--sharded---
+docker run --dns "192.168.0.1" -h "mongo_D1" --privileged -d alex/mongod_2.7.8 '--replSet xxx'
+docker run --dns "192.168.0.1" -h "mongo_D2" --privileged -d alex/mongod_2.7.8 '--replSet xxx'
+docker run --dns "192.168.0.1" -h "mongo_CFG" --privileged -d alex/mongod_2.7.8 --quiet
+docker run --dns "192.168.0.1" -h "mongo_S1" --privileged -d alex/mongos_2.7.8 '--configdb mongo_CFG:27017' ""
+
+docker run --dns "192.168.0.1" -h "mongotest" --name mongo --privileged --rm --entrypoint /bin/bash -it alex/mongod_2.7.8 -c /bin/bash
