@@ -1,6 +1,7 @@
 import subprocess
 import shlex
 import time
+import sys
 
 # starts a new container and returns it's id or 0 if there was an error
 def docker_exec(cmd):
@@ -13,6 +14,30 @@ def docker_exec(cmd):
 		return 0
 	return out
 
+# deploys new nodes according to the spec, returns 1 on success
+def docker_deploy(deploy):
+	global hosts
+	for host,opt in deploy.iteritems():
+        	res = docker_exec("docker run --dns '192.168.0.1' -h " + host + " --privileged -d " + opt[0] + " " + opt[1])
+        	if res != 0:
+                	print("Sucessfully started host " + host + " : " + res)
+                	hosts[host] = res
+        	else:
+                	print("Failed starting host " + host)
+			return 0
+	return 1
+
+# cleanup
+def docker_cleanup():
+	global hosts
+	for host,cont_id in hosts.iteritems():
+        	print("Removing the host: " + host)
+        	res = docker_exec("docker rm -f " + cont_id)
+        	if res != 0:
+                	print("Sucessfully removed host " + host + " : " + cont_id)
+        	else:
+                	print("Failed removing host " + host + " : " + cont_id)
+
 hosts = {}
 
 # create new system
@@ -23,14 +48,11 @@ deploy = {
 "mongo_S1" : ("alex/mongos_2.7.8", "'--configdb mongo_CFG:27017'")
 }
 
-#host = "mongo_D1"
-for host,opt in deploy.iteritems():
-	res = docker_exec("docker run --dns '192.168.0.1' -h " + host + " --privileged -d " + opt[0] + " " + opt[1])
-	if res != 0:
-		print("Sucessfully started host " + host + " : " + res)
-		hosts[host] = res
-	else:
-		print("Failed starting host " + host)
+res = docker_deploy(deploy)
+if res != 1:
+	print("Failed deploying. Aborting")
+	docker_cleanup()
+	sys.exit(2)
 
 # initialize it
 
@@ -38,13 +60,7 @@ for host,opt in deploy.iteritems():
 time.sleep(10)
 
 # cleanup
-for host,cont_id in hosts.iteritems():
-	print("Removing the host: " + host)
-	res = docker_exec("docker rm -f " + cont_id)
-	if res != 0:
-        	print("Sucessfully removed host " + host + " : " + cont_id)
-	else:
-        	print("Failed removing host " + host + " : " + cont_id)
+docker_cleanup()
 # run --dns "192.168.0.1" -h "mongo_D1" --privileged -d alex/mongod_2.7.8 '--replSet xxx'
 #docker run --dns "192.168.0.1" -h "mongo_D2" --privileged -d alex/mongod_2.7.8 '--replSet xxx'
 #docker run --dns "192.168.0.1" -h "mongo_CFG" --privileged -d alex/mongod_2.7.8 --quiet
