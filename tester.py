@@ -24,8 +24,14 @@ def wait_until_up(host,port):
 		except:
 			print "Unexpected error:", sys.exc_info()[0]
 			raise
-#def wait_for_master(host):
-	
+
+def wait_to_become_primary(host,port):
+	client = MongoClient(host, port)
+	print("Waiting for the " + host + " at " + str(port) + " to become PRIMARY")
+	while (client.admin.command('ismaster', 1)["ismaster"] != True):
+#		print("Waiting for " + host + " at " + str(port))
+		time.sleep(1)
+
 # starts a new container and returns it's id or 0 if there was an error
 def docker_exec(cmd):
 	args = shlex.split(cmd)
@@ -90,7 +96,7 @@ if res != 1:
 replSetConfig = {
      "_id" : "xxx",
      "members" : [
-         {"_id" : 0, "host" : "mongo_D1"},
+         {"_id" : 0, "host" : "mongo_D1", "priority" : 10},
          {"_id" : 1, "host" : "mongo_D2"}
      ]
 }
@@ -99,8 +105,10 @@ print("Init replica set..")
 client = MongoClient('mongo_D1', 27017)
 client.admin.command('replSetInitiate', replSetConfig)
 
-print("Napping just in case...")
-time.sleep(10)
+#print("Napping just in case...")
+#time.sleep(10)
+
+wait_to_become_primary('mongo_D1', 27017)
 
 print("Sharding the collection..")
 client = MongoClient('mongo_S1', 27017)
