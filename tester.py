@@ -5,8 +5,20 @@ import sys
 import pymongo
 from pymongo import MongoClient
 import collections
+import telnetlib 
 
-#def wait_until_up(host):
+def wait_until_up(host,port):
+	while True:
+		try:
+			print("Trying to reach " + host + " at " + str(port))
+			tn = telnetlib.Telnet()
+			tn.open(host,port)
+			tn.close()
+			break
+		except:
+#			raise
+			print "Unexpected error:", sys.exc_info()[0]
+			time.sleep(1)
 #def wait_for_master(host):
 	
 # starts a new container and returns it's id or 0 if there was an error
@@ -28,7 +40,8 @@ def docker_deploy(deploy):
         	if res != 0:
                 	print("Sucessfully started host " + host + " : " + res)
                 	hosts[host] = res
-			time.sleep(6) #seems slow on my machine
+			wait_until_up(host,opt[2])
+			#time.sleep(6) #seems slow on my machine
         	else:
                 	print("Failed starting host " + host)
 			return 0
@@ -49,10 +62,10 @@ hosts = {}
 
 # create new system (image, params, sleep time)
 deploy = collections.OrderedDict()
-deploy["mongo_D1"] = ("alex/mongod_1", "'--replSet xxx'", 0)
-deploy["mongo_D2"] = ("alex/mongod_1", "'--replSet xxx'", 0)
-deploy["mongo_CFG"] = ("alex/mongod_1", "''", 1)
-deploy["mongo_S1"] = ("alex/mongos_1", "'--configdb mongo_CFG:27017'", 5)
+deploy["mongo_D1"] = ("alex/mongod_1", "'--replSet xxx'", 27017)
+deploy["mongo_D2"] = ("alex/mongod_1", "'--replSet xxx'", 27017)
+deploy["mongo_CFG"] = ("alex/mongod_1", "''", 27017)
+deploy["mongo_S1"] = ("alex/mongos_1", "'--configdb mongo_CFG:27017'", 27017)
 
 
 #deploy = {
