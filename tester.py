@@ -6,19 +6,24 @@ import pymongo
 from pymongo import MongoClient
 import collections
 import telnetlib 
+import socket
 
 def wait_until_up(host,port):
+	print("Waiting for the " + host + " at " + str(port) + " to become available")
 	while True:
 		try:
-			print("Trying to reach " + host + " at " + str(port))
+#			print("Trying to reach " + host + " at " + str(port))
 			tn = telnetlib.Telnet()
 			tn.open(host,port)
 			tn.close()
 			break
-		except:
-#			raise
-			print "Unexpected error:", sys.exc_info()[0]
+		except socket.error:
 			time.sleep(1)
+                except socket.gaierror:
+                        time.sleep(1)
+		except:
+			print "Unexpected error:", sys.exc_info()[0]
+			raise
 #def wait_for_master(host):
 	
 # starts a new container and returns it's id or 0 if there was an error
