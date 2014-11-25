@@ -2,7 +2,13 @@ import subprocess
 import shlex
 import time
 import sys
+import pymongo
+from pymongo import MongoClient
+import collections
 
+#def wait_until_up(host):
+#def wait_for_master(host):
+	
 # starts a new container and returns it's id or 0 if there was an error
 def docker_exec(cmd):
 	args = shlex.split(cmd)
@@ -22,6 +28,7 @@ def docker_deploy(deploy):
         	if res != 0:
                 	print("Sucessfully started host " + host + " : " + res)
                 	hosts[host] = res
+			time.sleep(6) #seems slow on my machine
         	else:
                 	print("Failed starting host " + host)
 			return 0
@@ -40,13 +47,20 @@ def docker_cleanup():
 
 hosts = {}
 
-# create new system
-deploy = {
-"mongo_D1" : ("alex/mongod_2.7.8", "'--replSet xxx'"),
-"mongo_D2" : ("alex/mongod_2.7.8", "'--replSet xxx'"),
-"mongo_CFG" : ("alex/mongod_2.7.8", "''"),
-"mongo_S1" : ("alex/mongos_2.7.8", "'--configdb mongo_CFG:27017'")
-}
+# create new system (image, params, sleep time)
+deploy = collections.OrderedDict()
+deploy["mongo_D1"] = ("alex/mongod_1", "'--replSet xxx'", 0)
+deploy["mongo_D2"] = ("alex/mongod_1", "'--replSet xxx'", 0)
+deploy["mongo_CFG"] = ("alex/mongod_1", "''", 1)
+deploy["mongo_S1"] = ("alex/mongos_1", "'--configdb mongo_CFG:27017'", 5)
+
+
+#deploy = {
+#"mongo_D1" : ("alex/mongod_2.7.8", "'--replSet xxx'"),
+#"mongo_D2" : ("alex/mongod_2.7.8", "'--replSet xxx'"),
+#"mongo_CFG" : ("alex/mongod_2.7.8", "''"),
+#"mongo_S1" : ("alex/mongos_2.7.8", "'--configdb mongo_CFG:27017'")
+#}
 
 res = docker_deploy(deploy)
 if res != 1:
@@ -55,15 +69,35 @@ if res != 1:
 	sys.exit(2)
 
 # initialize it
+replSetConfig = {
+     "_id" : "xxx",
+     "members" : [
+         {"_id" : 0, "host" : "mongo_D1"},
+         {"_id" : 1, "host" : "mongo_D2"}
+     ]
+}
 
-# run tests
+print("Init replica set..")
+client = MongoClient('mongo_D1', 27017)
+client.admin.command('replSetInitiate', replSetConfig)
+
+print("Napping just in case...")
 time.sleep(10)
+
+print("Sharding the collection..")
+client = MongoClient('mongo_S1', 27017)
+client.admin.command('addShard', 'xxx/mongo_D1')
+client.admin.command('enableSharding', 'test')
+client.admin.command('shardCollection', 'test.test', key={'_id': 1})
+
+print("Napping just in case...")
+time.sleep(5)
+
+client['test'].test.insert(deploy)
+print(client['test'].test.find_one())
+
+print("Done")
 
 # cleanup
 docker_cleanup()
-# run --dns "192.168.0.1" -h "mongo_D1" --privileged -d alex/mongod_2.7.8 '--replSet xxx'
-#docker run --dns "192.168.0.1" -h "mongo_D2" --privileged -d alex/mongod_2.7.8 '--replSet xxx'
-#docker run --dns "192.168.0.1" -h "mongo_CFG" --privileged -d alex/mongod_2.7.8 --quiet
-#docker run --dns "192.168.0.1" -h "mongo_S1" --privileged -d alex/mongos_2.7.8 '--configdb mongo_CFG:27017' ""
 
-#echo mongo mongo_S1  
