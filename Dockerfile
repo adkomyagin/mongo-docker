@@ -13,5 +13,7 @@ RUN apt-get install -y iptables
 RUN mkdir -p /data/db
 EXPOSE 27017
 COPY starter.sh /opt/starter.sh
+COPY bin /usr/local/bin
+ENV PATH /usr/local/bin:$PATH
 
 ENTRYPOINT ["/opt/starter.sh"]
