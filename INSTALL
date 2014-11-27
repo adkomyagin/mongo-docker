@@ -1,0 +1,24 @@
+1. Requirements: docker 1.3+, mongo-shell, dnsmasq, brctl
+2. Create a bridge:
+root@ip-10-45-3-116:/home/ubuntu# cat /etc/network/interfaces.d/br0.cfg
+auto br0
+iface br0 inet static
+address 192.168.0.1
+netmask 255.255.0.0
+3. Bring it up:
+sudo brctl addbr br0
+4. Set docker to use br0:
+root@ip-10-45-3-116:/home/ubuntu# cat /etc/default/docker
+DOCKER_OPTS="-b=br0"
+5. Set dnsmasq to sit on br0:
+root@ip-10-45-3-116:/home/ubuntu# cat /etc/dnsmasq.conf | grep interface=
+interface=br0
+#except-interface=
+#no-dhcp-interface=
+6. Enable DHCP server in dnsmasq:
+root@ip-10-45-3-116:/home/ubuntu# cat /etc/dnsmasq.conf | grep dhcp-range=
+dhcp-range=192.168.0.50,192.168.0.150,12h
+7. Restart dnsmasq
+sudo service dnsmasq restart
+8. Restart docker
+sudo service docker restart
