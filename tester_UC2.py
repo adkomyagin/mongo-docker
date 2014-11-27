@@ -85,10 +85,11 @@ hosts = {}
 
 # create new system (image, params, sleep time)
 deploy = collections.OrderedDict()
-deploy["mongo_D1"] = ("alex/mongod_1", "'--replSet xxx'", 27017)
-deploy["mongo_D2"] = ("alex/mongod_1", "'--replSet xxx'", 27017)
-deploy["mongo_CFG"] = ("alex/mongod_1", "''", 27017)
-deploy["mongo_S1"] = ("alex/mongos_1", "'--configdb mongo_CFG:27017'", 27017)
+default_image = "alex/mongodb_1"
+deploy["mongo_D1"] = (default_image, "mongod --smallfiles --replSet xxx", 27017)
+deploy["mongo_D2"] = (default_image, "mongod --smallfiles --replSet xxx", 27017)
+deploy["mongo_CFG"] = (default_image, "mongod --smallfiles", 27017)
+deploy["mongo_S1"] = (default_image, "mongos --configdb mongo_CFG:27017", 27017)
 
 
 #deploy = {
