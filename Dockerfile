@@ -1,8 +1,8 @@
 FROM       ubuntu:latest
 MAINTAINER Alex Komyagin <alex@mongodb.com>
 
-ENV mongo_version 2.7.8
-ENV mongo_pkg mongodb-org-unstable
+ENV mongo_version 2.6.5
+ENV mongo_pkg mongodb-org
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 RUN echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | tee /etc/apt/sources.list.d/10gen.list

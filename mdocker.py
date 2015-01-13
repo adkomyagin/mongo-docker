@@ -25,7 +25,7 @@ def wait_until_up(host,port):
 		try:
 #			print("Trying to reach " + host + " at " + str(port))
 			tn = telnetlib.Telnet()
-			tn.open(host,port)
+			tn.open(host,port,10)
 			tn.close()
 			break
 		except socket.error:
@@ -77,4 +77,7 @@ class MDocker:
 
 	def unblock(self, host):
         	docker_exec("docker exec " + self.hosts[host] + " /sbin/iptables -F")
+
+        def local_mongo_shell(self, host, cmd):
+                docker_exec("docker exec " + self.hosts[host] + " mongo --eval \"" + cmd + "\"")
 
