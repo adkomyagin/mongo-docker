@@ -1,11 +1,35 @@
 Mongo-docker is a docker-based framework for testing complicated setups
 
-All you need is the mdocker module and some luck.
+Here is a quick start guide:
+1. Follow the steps in the INSTALL file to set up the OS and packages
+2. Adjust the mongodb version and the mongodb package name in the Dockerfile. E.g. for 2.6.5 it would be
+    mongo_version 2.6.5
+    mongo_pkg mongodb-org
+3. Build a new docker image named mongodb_1:
+    docker build -t alex/mongodb_1 .
+4. Create a python script with the test scanarion
+4.1 Import the mdocker module and the MDocker class, as well as some auxiliary functions
+    import mdocker
+    from mdocker import wait_to_become_primary, MDocker
+4.2 You will likely want to import pymongo and MongoClient as well
+    import pymongo
+    from pymongo import MongoClient
+4.3 Create an instance of MDocker class that will do the docker management
+    docker = MDocker()
+4.4 Create a deployment scenario as an ordered dictionary { hosname : (image_name, exec_string, port) }
+    - Port should be in sync with the exec_string, e.g.:
+    deploy = collections.OrderedDict()
+    default_image = "alex/mongodb_1"
+    deploy["mongo_D1"] = (default_image, "mongod --smallfiles --replSet xxx --port 27017", 27017)
+4.5 Call the MDocker.deploy method to deploy the environemnt
+    docker.deploy(deploy)
+4.6 Upon success (return code 1), the enviornment should be running and accessible using the specified hostnames. Use regular pymongo constructions to initialize it and perform tests
+    - the MDocker class has a block(hostname) and an unblock(hostname) methods to drop all in/out packets for the specified host (simulating a TCP black hole)
+4.7 Call the MDocker.cleanup method to clean up the enviornment and remove the containers
+    docker.cleanup()
+5. If your test ezited without cleanup, use this command to stop and remove all existing containers:
+    docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
 
-Follow the steps in the INSTALL file, import the mdocker module, create a new 
+You can also see the tester_S16237.py test as a reference
 
-Some useful commands:
-1. Build a new image named mongodb_1
-	docker build -t alex/mongodb_1 .
-2. Stop and remove all existing containers:
-	docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
+Good luck, and may the Force be with you!
