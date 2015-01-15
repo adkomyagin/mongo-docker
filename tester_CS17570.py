@@ -12,13 +12,13 @@ docker = MDocker()
 
 # create new system (image, params, sleep time)
 deploy = collections.OrderedDict()
-default_image = "alex/mongodb_26_auth"
-deploy["mongo_D1"] = (default_image, "mongod --smallfiles --replSet xxx --keyFile /usr/local/bin/keyfile", 27017)
-deploy["mongo_D2"] = (default_image, "mongod --smallfiles --replSet xxx --keyFile /usr/local/bin/keyfile", 27017)
-deploy["mongo_CFG1"] = (default_image, "mongod --smallfiles --keyFile /usr/local/bin/keyfile", 27017)
-deploy["mongo_CFG2"] = (default_image, "mongod --smallfiles --keyFile /usr/local/bin/keyfile", 27017)
-deploy["mongo_CFG3"] = (default_image, "mongod --smallfiles --keyFile /usr/local/bin/keyfile", 27017)
-deploy["mongo_S1"] = (default_image, "mongos --configdb mongo_CFG1:27017,mongo_CFG2:27017,mongo_CFG3:27017 --keyFile /usr/local/bin/keyfile", 27017)
+default_image = "alex/mongodb_26_auth_ent"
+deploy["mongo_D1"] = (default_image, "mongod --sslMode preferSSL --sslPEMKeyFile /usr/local/bin/cert.pem --smallfiles --replSet xxx --keyFile /usr/local/bin/keyfile", 27017)
+deploy["mongo_D2"] = (default_image, "mongod --sslMode preferSSL --sslPEMKeyFile /usr/local/bin/cert.pem --smallfiles --replSet xxx --keyFile /usr/local/bin/keyfile", 27017)
+deploy["mongo_CFG1"] = (default_image, "mongod --sslMode preferSSL --sslPEMKeyFile /usr/local/bin/cert.pem --smallfiles --keyFile /usr/local/bin/keyfile", 27017)
+deploy["mongo_CFG2"] = (default_image, "mongod --sslMode preferSSL --sslPEMKeyFile /usr/local/bin/cert.pem --smallfiles --keyFile /usr/local/bin/keyfile", 27017)
+deploy["mongo_CFG3"] = (default_image, "mongod --sslMode preferSSL --sslPEMKeyFile /usr/local/bin/cert.pem --smallfiles --keyFile /usr/local/bin/keyfile", 27017)
+deploy["mongo_S1"] = (default_image, "mongos --sslMode preferSSL --sslPEMKeyFile /usr/local/bin/cert.pem --configdb mongo_CFG1:27017,mongo_CFG2:27017,mongo_CFG3:27017 --keyFile /usr/local/bin/keyfile", 27017)
 
 res = docker.deploy(deploy)
 if res != 1:
