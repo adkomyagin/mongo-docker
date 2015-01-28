@@ -1,0 +1,22 @@
+FROM       ubuntu:precise
+MAINTAINER Alex Komyagin <alex@mongodb.com>
+
+ENV mongo_version 2.6.3
+ENV mongo_pkg mongodb-enterprise
+
+RUN apt-get update && apt-get install -y isc-dhcp-client
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+RUN echo "deb http://repo.mongodb.com/apt/ubuntu precise/mongodb-enterprise/2.6 multiverse" | tee /etc/apt/sources.list.d/mongodb-enterprise-2.6.list
+RUN apt-get update && apt-get install -y ${mongo_pkg}=${mongo_version} ${mongo_pkg}-server=${mongo_version} ${mongo_pkg}-shell=${mongo_version} ${mongo_pkg}-mongos=${mongo_version} ${mongo_pkg}-tools=${mongo_version}
+
+RUN apt-get install -y iptables
+
+RUN apt-get install -y libgssapi-krb5-2 
+
+RUN mkdir -p /data/db
+EXPOSE 27017
+COPY common/starter.sh /opt/starter.sh
+COPY common/bin /usr/local/bin
+ENV PATH /usr/local/bin:$PATH
+
+ENTRYPOINT ["/opt/starter.sh"]

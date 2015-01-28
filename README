@@ -6,7 +6,7 @@ Here is a quick start guide:
     mongo_version 2.6.5
     mongo_pkg mongodb-org
 3. Build a new docker image named mongodb_1:
-    docker build -t alex/mongodb_1 .
+    docker build -t alex/mongodb_26_auth_org -f Dockerfile-org .
 4. Create a python script with the test scanarion
 4.1 Import the mdocker module and the MDocker class, as well as some auxiliary functions
     import mdocker

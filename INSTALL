@@ -1,4 +1,4 @@
-1. Requirements: docker 1.3+, mongo-shell, dnsmasq, brctl
+1. Requirements: docker 1.4.1-dev+, mongo-shell, dnsmasq, brctl
 2. Disable apparmor, SELinux and such
 sudo invoke-rc.d apparmor kill
 sudo update-rc.d -f apparmor remove
