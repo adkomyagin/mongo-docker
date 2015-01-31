@@ -1,6 +1,9 @@
+green=`tput setaf 2`
+reset=`tput sgr0`
+
 if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 
-echo "Installing packages"
+echo "${green}Installing packages${reset}"
 [ -e /usr/lib/apt/methods/https ] || {
   apt-get update
   apt-get install apt-transport-https
@@ -9,6 +12,7 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8
 echo "deb https://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
 apt-get update
 apt-get install -y lxc-docker
+update-rc.d docker defaults
 
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
@@ -16,42 +20,43 @@ apt-get update
 apt-get install -y mongodb-org-shell
 
 apt-get install -y dnsmasq
-apt-get install -y brctl
+apt-get install -y bridge-utils
 
-apt-get install -y pip
+apt-get install -y python-pip
 pip install pymongo
 
-echo "Overriding the 1.4.1-dev version of Docker"
+echo "${green}Overriding the 1.4.1-dev version of Docker${reset}"
 wget https://master.dockerproject.com/linux/amd64/docker-1.4.1-dev -O docker
 chmod +x docker
 mv docker /usr/bin/docker
 
-echo "Disabling AppArmor"
-invoke-rc.d apparmor kill
+echo "${green}Disabling AppArmor${reset}"
+invoke-rc.d apparmor stop
 update-rc.d -f apparmor remove
 
-echo "Creating a bridge"
+echo "${green}Creating a bridge${reset}"
 cat > /etc/network/interfaces.d/br0.cfg << XXX
 auto br0
 iface br0 inet static
+pre-up brctl addbr br0
 address 192.168.0.1
 netmask 255.255.0.0
 XXX
 
-echo "Bringing the bridge up"
+echo "${green}Bringing the bridge up${reset}"
 brctl addbr br0
 
-echo "Setting docker to use br0"
+echo "${green}Setting docker to use br0${reset}"
 cat >> /etc/default/docker << XXX
 DOCKER_OPTS="-b=br0"
 XXX
 
-echo "Setting dnsmasq to sit on br0"
+echo "${green}Setting dnsmasq to sit on br0${reset}"
 echo "interface=br0" >> /etc/dnsmasq.conf
 
-echo "Enabling DHCP server in dnsmasq"
+echo "${green}Enabling DHCP server in dnsmasq${reset}"
 echo "dhcp-range=192.168.0.50,192.168.0.150,12h" >> /etc/dnsmasq.conf
 
-echo "Rebooting in 3 secs"
-sleep 3
+echo "${green}Rebooting in 10 secs${reset}"
+sleep 10
 reboot
