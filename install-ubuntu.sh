@@ -18,11 +18,6 @@ apt-get install -y mongodb-org-shell lxc-docker dnsmasq bridge-utils python-pip 
 update-rc.d docker defaults
 pip install pymongo
 
-echo "${green}Overriding the 1.4.1-dev version of Docker${reset}"
-wget https://master.dockerproject.com/linux/amd64/docker-1.4.1-dev -O docker
-chmod +x docker
-mv docker /usr/bin/docker
-
 echo "${green}Disabling AppArmor${reset}"
 invoke-rc.d apparmor stop
 update-rc.d -f apparmor remove
