@@ -10,19 +10,12 @@ echo "${green}Installing packages${reset}"
 }
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
 echo "deb https://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
-apt-get update
-apt-get install -y lxc-docker
-update-rc.d docker defaults
-
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
-apt-get update
-apt-get install -y mongodb-org-shell
+apt-get update >/dev/null
+apt-get install -y mongodb-org-shell lxc-docker dnsmasq bridge-utils python-pip build-essential python-dev >/dev/null
 
-apt-get install -y dnsmasq
-apt-get install -y bridge-utils
-
-apt-get install -y python-pip
+update-rc.d docker defaults
 pip install pymongo
 
 echo "${green}Overriding the 1.4.1-dev version of Docker${reset}"
