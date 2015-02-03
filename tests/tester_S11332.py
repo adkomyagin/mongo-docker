@@ -13,7 +13,7 @@ docker = MDocker()
 
 # create new system (image, params, sleep time)
 deploy = collections.OrderedDict()
-default_image = "alex/mongodb_1"
+default_image = "test/mongodb_2.6.5"
 deploy["mongo_D1"] = (default_image, "mongod --smallfiles --replSet xxx", 27017)
 deploy["mongo_D2"] = (default_image, "mongod --smallfiles --replSet xxx", 27017)
 deploy["mongo_CFG1"] = (default_image, "mongod --smallfiles", 27017)
