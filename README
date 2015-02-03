@@ -7,7 +7,7 @@ Here is a quick start guide:
     mongo_pkg mongodb-org
 3. Build a new docker image named mongodb_1:
     docker build -t test/mongodb_2.6.5 -f Dockerfile-org .
-4. Create a python script with the test scanarion
+4. Create a python script with the test scanario
 4.1 Import the mdocker module and the MDocker class, as well as some auxiliary functions
     import mdocker
     from mdocker import wait_to_become_primary, MDocker
@@ -27,7 +27,7 @@ Here is a quick start guide:
     - the MDocker class has a block(hostname) and an unblock(hostname) methods to drop all in/out packets for the specified host (simulating a TCP black hole)
 4.7 Call the MDocker.cleanup method to clean up the enviornment and remove the containers
     docker.cleanup()
-5. If your test ezited without cleanup, use this command to stop and remove all existing containers:
+5. If your test exited without cleanup or due to an error, use this command to stop and remove all existing containers:
     docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)
 
 You can also see the tester_S16237.py test as a reference
