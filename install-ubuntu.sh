@@ -18,6 +18,8 @@ apt-get install -y mongodb-org-shell lxc-docker dnsmasq bridge-utils python-pip 
 update-rc.d docker defaults
 pip install pymongo
 
+echo "${green}Patching docker binaries${reset}"
+service docker stop
 cp docker_bin/docker /usr/bin/docker
 chmod +x /usr/bin/docker
 cp docker_bin/dockerinit /usr/bin/dockerinit
