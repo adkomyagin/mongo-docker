@@ -23,3 +23,10 @@ class Measurer:
     		pvar = ss/n # the population variance
     		return [c,pvar**0.5]
 
+	def check(self,mean,stdev):
+		li = self.compute()
+		if mean < li[0]:
+			return -1
+		if stdev < li[1]:
+			return -1
+		return 1
