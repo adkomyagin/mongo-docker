@@ -1,1 +1,1 @@
-Dockerfile-templates/Dockerfile-org
+Dockerfile-templates/Dockerfile-3.0-org
